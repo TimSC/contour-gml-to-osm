@@ -80,11 +80,10 @@ class ReadGml(object):
 
 		return data
 
-if __name__ == "__main__":
-	archName = "/home/tim/Downloads/terr50_cgml_gb/data/so/so00_OST50CONT_20130612.zip"
-
+def ReadGmlZip(archName):
 	zipContent = zipfile.ZipFile(archName)
 	fiList = zipContent.namelist()
+	out = []
 
 	for fina in fiList:
 		extspl = os.path.splitext(fina)
@@ -93,6 +92,14 @@ if __name__ == "__main__":
 			readGml = ReadGml()
 			memData = readGml.Read(zipContent.open(fina))
 			print "Number of members:", len(memData)
+			out.append(memData)
+
+	return out
+
+if __name__ == "__main__":
+	archName = "/home/tim/Downloads/terr50_cgml_gb/data/so/so00_OST50CONT_20130612.zip"
+
+	ReadGmlZip(archName)
 
 
 
