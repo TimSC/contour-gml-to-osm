@@ -33,7 +33,17 @@ class OsmOutput(object):
 			self.fi.write(u' <tag k={0} v={1} />\n'.format(quoteattr(escape(key)), quoteattr(escape(tags[key]))))
 		self.fi.write(u"</way>\n")
 
-
+	def WriteRelation(self, wayId, members, tags):
+		self.fi.write(u"<relation id='{0}'>\n".format(int(wayId)))
+		for member in members:
+			self.fi.write(u" <member type={0} ref='{1}' role={2}/>\n".format(
+				quoteattr(escape(member[0])), 
+				int(member[1]), 
+				quoteattr(escape(member[2]))
+				))
+		for key in tags:
+			self.fi.write(u' <tag k={0} v={1} />\n'.format(quoteattr(escape(key)), quoteattr(escape(tags[key]))))
+		self.fi.write(u"</relation>\n")
 
 if __name__ == "__main__":
 	
@@ -41,4 +51,8 @@ if __name__ == "__main__":
 	osmOutput.WriteNode(-1, 51., -1., {'test':"\"'", 'test2':u"This has ♭"})
 	osmOutput.WriteNode(-2, 50., -2., {})
 	osmOutput.WriteWay(-1, [-1, -2], {"test3": "stuff"})
+
+
+	osmOutput.WriteRelation(-1, [("node", -1, "weird"), ], {"foo":"bar"})
+
 
