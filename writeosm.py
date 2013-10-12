@@ -18,7 +18,7 @@ class OsmOutput(object):
 	def WriteNode(self, objId, lat, lon, keys):
 		self.fi.write(u"<node id='{0}' lat='{1}' lon='{2}'".format(int(objId), float(lat), float(lon)))
 		if len(keys) == 0:
-			self.fi.write(" \>\n")
+			self.fi.write(" />\n")
 		else:
 			self.fi.write(">\n")
 			for key in keys:
@@ -29,4 +29,5 @@ if __name__ == "__main__":
 	
 	osmOutput = OsmOutput("test.osm")
 	osmOutput.WriteNode(-1, 51., -1., {'test':"\"'", 'test2':u"This has ♭"})
+	osmOutput.WriteNode(-2, 50., -2., {})
 
