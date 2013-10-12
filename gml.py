@@ -22,6 +22,7 @@ class ReadGml(object):
 				
 				shp = LineString(lonLat)
 				#print shp
+				return shp
 
 			if ch.tag == "{http://www.opengis.net/gml/3.2}Point":
 				posEl = ch.find("{http://www.opengis.net/gml/3.2}pos")
@@ -31,48 +32,53 @@ class ReadGml(object):
 				
 				shp = Point(glo, gla)
 				#print shp
+				return shp
 			#print ch.tag
-		
+
+		return None
 
 	def ReadSpotHeight(self, el):
-		for ch in el:
-			
-			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}geometry":
-				self.ReadGeometry(ch)
-				continue
 
-			#print ch.tag
-		pass
+		geoEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}geometry")
+		shp = self.ReadGeometry(geoEl)
+
+		propEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}propertyValue")
+		return (shp, {'ele':propEl.text})
 
 	def ReadContour(self, el):
-		for ch in el:
-			
-			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}geometry":
-				self.ReadGeometry(ch)
-				continue
 
-			#print ch.tag
+		geoEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}geometry")
+		shp = self.ReadGeometry(geoEl)
+
+		propEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}propertyValue")
+		return (shp, {'ele':propEl.text})
 
 	def ReadMember(self, el):
 		for ch in el:
 			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}ContourLine":
-				self.ReadContour(ch)
-				continue
+				shp, tags = self.ReadContour(ch)
+				return shp, tags 
 
 			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}SpotHeight":
-				self.ReadSpotHeight(ch)
-				continue
+				shp, tags = self.ReadSpotHeight(ch)
+				return shp, tags
 
 			print ch.tag
+		return None
 
 	def Read(self, gmlFi):
 		root = ET.fromstring(gmlFi.read())
+		data = []
+
 		for ch in root:
 		
 			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}member":
-				self.ReadMember(ch)
+				mem = self.ReadMember(ch)
+				data.append(mem)
 			else:
-				print ch.tag
+				print "Unprocessed tag:", ch.tag
+
+		return data
 
 if __name__ == "__main__":
 	archName = "/home/tim/Downloads/terr50_cgml_gb/data/so/so00_OST50CONT_20130612.zip"
@@ -83,6 +89,10 @@ if __name__ == "__main__":
 	for fina in fiList:
 		extspl = os.path.splitext(fina)
 		if extspl[1] == ".gml":
+			print "Reading", fina
 			readGml = ReadGml()
-			readGml.Read(zipContent.open(fina))
+			memData = readGml.Read(zipContent.open(fina))
+			print "Number of members:", len(memData)
+
+
 
