@@ -57,11 +57,11 @@ class ReadGml(object):
 		for ch in el:
 			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}ContourLine":
 				shp, tags = self.ReadContour(ch)
-				return shp, tags 
+				return [shp, tags]
 
 			if ch.tag == "{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}SpotHeight":
 				shp, tags = self.ReadSpotHeight(ch)
-				return shp, tags
+				return [shp, tags]
 
 			print ch.tag
 		return None
