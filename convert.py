@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
 	for gmlDataFi in gmlData:
 		print "Simplify"
-		for objData in shapelyData:
+		for objData in gmlDataFi:
 			shp, tags = objData
 			objData[0] = shp.simplify(10.)
 
