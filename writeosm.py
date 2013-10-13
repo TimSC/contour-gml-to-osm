@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from xml.sax.saxutils import escape, quoteattr
+import cart, math
 
 class OsmOutput(object):
 	def __init__(self, fina):
@@ -19,13 +20,20 @@ class OsmOutput(object):
 		self.fi.close()
 
 	def WriteNode(self, objId, lat, lon, tags):
-		self.fi.write(u"<node id='{0}' lat='{1}' lon='{2}'".format(int(objId), float(lat), float(lon)).encode('UTF-8'))
+		self.fi.write(u"<node id='{0}' lat='{1}' lon='{2}'".format(
+			int(objId), 
+			float(lat), 
+			float(lon)
+			).encode('UTF-8'))
 		if len(tags) == 0:
 			self.fi.write(u" />\n".encode('UTF-8'))
 		else:
 			self.fi.write(u">\n".encode('UTF-8'))
 			for key in tags:
-				self.fi.write(u' <tag k={0} v={1} />\n'.format(quoteattr(escape(key)), quoteattr(escape(tags[key]))).encode('UTF-8'))
+				self.fi.write(u' <tag k={0} v={1} />\n'.format(
+					quoteattr(escape(key)), 
+					quoteattr(escape(tags[key]))
+					).encode('UTF-8'))
 			self.fi.write(u"</node>\n".encode('UTF-8'))
 
 	def WriteWay(self, wayId, nodeIds, tags):
@@ -33,7 +41,10 @@ class OsmOutput(object):
 		for nid in nodeIds:
 			self.fi.write(u" <nd ref='{0}' />\n".format(int(nid)).encode('UTF-8'))
 		for key in tags:
-			self.fi.write(u' <tag k={0} v={1} />\n'.format(quoteattr(escape(key)), quoteattr(escape(tags[key]))).encode('UTF-8'))
+			self.fi.write(u' <tag k={0} v={1} />\n'.format(
+				quoteattr(escape(key)), 
+				quoteattr(escape(tags[key]))
+				).encode('UTF-8'))
 		self.fi.write(u"</way>\n".encode('UTF-8'))
 
 	def WriteRelation(self, wayId, members, tags):
@@ -45,8 +56,33 @@ class OsmOutput(object):
 				quoteattr(escape(member[2]))
 				).encode('UTF-8'))
 		for key in tags:
-			self.fi.write(u' <tag k={0} v={1} />\n'.format(quoteattr(escape(key)), quoteattr(escape(tags[key]))).encode('UTF-8'))
+			self.fi.write(u' <tag k={0} v={1} />\n'.format(
+				quoteattr(escape(key)), 
+				quoteattr(escape(tags[key]))
+				).encode('UTF-8'))
 		self.fi.write(u"</relation>\n".encode('UTF-8'))
+
+def ShapelyToOsm(shapelyData, osmFi):
+	out = OsmOutput(osmFi)
+	nextNodeId = -1
+	nextWayId = -1
+
+	for shp, tags in shapelyData:
+		#print shp.geom_type, tags
+		if shp.geom_type == "LineString":
+			nids = []
+			for pt in shp.coords:
+				lat, lon, alt = cart.CartToLatLon(*pt)
+				out.WriteNode(nextNodeId, math.degrees(lat), math.degrees(lon), {})
+				nids.append(nextNodeId)
+				nextNodeId -= 1
+			out.WriteWay(nextWayId, nids, tags)
+			nextWayId -= 1
+
+		if shp.geom_type == "Point":
+			lat, lon, alt = cart.CartToLatLon(shp.x, shp.y, shp.z)
+			out.WriteNode(nextNodeId, math.degrees(lat), math.degrees(lon), tags)
+			nextNodeId -= 1
 
 if __name__ == "__main__":
 	

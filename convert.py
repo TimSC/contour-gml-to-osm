@@ -1,11 +1,16 @@
-import gml, writeosm
+import gml, writeosm, pickle
 
 if __name__ == "__main__":
 	
 	archName = "/home/tim/Downloads/terr50_cgml_gb/data/so/so00_OST50CONT_20130612.zip"
-	#gmlData = gml.ReadGmlZip(archName)
+	if 1:
+		gmlData = gml.ReadGmlZip(archName)
+		pickle.dump(gmlData, open("gmlData.dat", "wb"), protocol = -1) 
+	else:
+		gmlData = pickle.load(open("gmlData.dat", "rb"))
 	
-	#print "GML files in archive", len(gmlData)
+	print "GML files in archive", len(gmlData)
+	
+	for gmlDataFi in gmlData:
+		writeosm.ShapelyToOsm(gmlDataFi, "test.osm")
 
-	out = writeosm.OsmOutput("test.osm")
-	

@@ -1,5 +1,5 @@
 
-import zipfile, os
+import zipfile, os, cart, math
 import xml.etree.ElementTree as ET
 from ostn02python import OSTN02, OSGB
 from shapely.geometry import LineString, Point
@@ -13,15 +13,15 @@ class ReadGml(object):
 				posFloats = map(float, posListEl.text.split(" "))
 				est = posFloats[0::2] 
 				nth = posFloats[1::2]
-				lonLat = []
+				pts = []
 				for e, n in zip(est, nth):
 					(x,y,h) = OSTN02.OSGB36_to_ETRS89 (e, n)
 					(gla, glo) = OSGB.grid_to_ll(x, y)
 					#print e, n, gla, glo, h
-					lonLat.append((glo, gla))
+					p = cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.)
+					pts.append(p)
 				
-				shp = LineString(lonLat)
-				#print shp
+				shp = LineString(pts)
 				return shp
 
 			if ch.tag == "{http://www.opengis.net/gml/3.2}Point":
@@ -30,7 +30,7 @@ class ReadGml(object):
 				(x,y,h) = OSTN02.OSGB36_to_ETRS89 (posFloat[0], posFloat[1])
 				(gla, glo) = OSGB.grid_to_ll(x, y)
 				
-				shp = Point(glo, gla)
+				shp = Point(cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.))
 				#print shp
 				return shp
 			#print ch.tag
