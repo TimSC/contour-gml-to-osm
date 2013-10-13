@@ -43,7 +43,11 @@ class ReadGml(object):
 		shp = self.ReadGeometry(geoEl)
 
 		propEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}propertyValue")
-		return (shp, {'ele':propEl.text})
+
+		tags = {'ele':propEl.text}
+		tags['terrain'] = "ele"
+
+		return (shp, tags)
 
 	def ReadContour(self, el):
 
@@ -51,7 +55,22 @@ class ReadGml(object):
 		shp = self.ReadGeometry(geoEl)
 
 		propEl = el.find("{http://namespaces.ordnancesurvey.co.uk/elevation/contours/v1.0}propertyValue")
-		return (shp, {'ele':propEl.text})
+		ele = float(propEl.text)
+		tags = {'ele':propEl.text}
+		tags['contour'] = 'elevation'
+		if int(round(ele)) % 100 == 0:
+			tags['contourtype'] = "100m"
+		else:
+			if int(round(ele)) % 50 == 0:
+				tags['contourtype'] = "50m"
+			else:
+				if int(round(ele)) % 20 == 0:
+					tags['contourtype'] = "20m"
+				else:
+					if int(round(ele)) % 10 == 0:
+						tags['contourtype'] = "10m"
+
+		return (shp, tags)
 
 	def ReadMember(self, el):
 		for ch in el:
