@@ -15,11 +15,15 @@ class ReadGml(object):
 				nth = posFloats[1::2]
 				pts = []
 				for e, n in zip(est, nth):
-					(x,y,h) = OSTN02.OSGB36_to_ETRS89 (e, n)
-					(gla, glo) = OSGB.grid_to_ll(x, y)
-					#print e, n, gla, glo, h
-					p = cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.)
-					pts.append(p)
+					try:
+						(x,y,h) = OSTN02.OSGB36_to_ETRS89 (e, n)
+						(gla, glo) = OSGB.grid_to_ll(x, y)
+						#print e, n, gla, glo, h
+						p = cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.)
+						pts.append(p)
+					except:
+						pass						
+
 				
 				if len(pts) < 2: return None
 				shp = LineString(pts)
@@ -28,12 +32,17 @@ class ReadGml(object):
 			if ch.tag == "{http://www.opengis.net/gml/3.2}Point":
 				posEl = ch.find("{http://www.opengis.net/gml/3.2}pos")
 				posFloat = map(float, posEl.text.split(" "))
-				(x,y,h) = OSTN02.OSGB36_to_ETRS89 (posFloat[0], posFloat[1])
-				(gla, glo) = OSGB.grid_to_ll(x, y)
+				try:
+					(x,y,h) = OSTN02.OSGB36_to_ETRS89 (posFloat[0], posFloat[1])
+					(gla, glo) = OSGB.grid_to_ll(x, y)	
+					shp = Point(cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.))
+					return shp
+				except:
+					pass
 				
-				shp = Point(cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.))
+				
 				#print shp
-				return shp
+				return None
 			#print ch.tag
 
 		return None
