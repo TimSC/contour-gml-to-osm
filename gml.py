@@ -21,6 +21,7 @@ class ReadGml(object):
 					p = cart.LatLonToCart(math.radians(gla), math.radians(glo), 0.)
 					pts.append(p)
 				
+				if len(pts) < 2: return None
 				shp = LineString(pts)
 				return shp
 
