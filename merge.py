@@ -42,7 +42,10 @@ if __name__=="__main__":
 	out.write("<?xml version='1.0' encoding='UTF-8'?>\n")
 	out.write("<osm version='0.6' upload='true' generator='py'>\n")
 
-	lats, lons = [51.383075,50.705752], [-1.955713,-0.729294]
+	#lats, lons = [51.383075,50.50], [-1.955713,-0.729294] #Hampshire
+	lats, lons = [50.703, 51.167], [-0.955, 0.040] #West sussex
+	#lats, lons = [50.7217072, 51.1475977], [-0.1424041, 0.8675128]  #East sussex
+
 	collectEastings = []
 	collectNorthings = []
 
@@ -79,6 +82,7 @@ if __name__=="__main__":
 			fina = "out/"+str(tileCode[:2])+"/"+str(tileCode[:4])+"_OST50CONT_20130612.osm.bz2"
 			if not os.path.exists(fina): continue
 			fiList.append(fina)
+	exit(0)
 			
 	nextObjId = {"node": -1, "way": -1, "relation": -1}
 	idMapping = {}
