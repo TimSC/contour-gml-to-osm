@@ -43,8 +43,9 @@ if __name__=="__main__":
 	out.write("<osm version='0.6' upload='true' generator='py'>\n")
 
 	#lats, lons = [51.383075,50.50], [-1.955713,-0.729294] #Hampshire
-	lats, lons = [50.703, 51.167], [-0.955, 0.040] #West sussex
+	#lats, lons = [50.703, 51.167], [-0.955, 0.040] #West sussex
 	#lats, lons = [50.7217072, 51.1475977], [-0.1424041, 0.8675128]  #East sussex
+	lats, lons = [51.8251473, 52.3967369], [-3.1446227, -2.3441835]  #Herefordshire
 
 	collectEastings = []
 	collectNorthings = []
@@ -54,7 +55,11 @@ if __name__=="__main__":
 		for lon in lons:
 			
 			(x2,y2) = OSGB.ll_to_grid(lat, lon)
-			e, n, h = OSTN02.ETRS89_to_OSGB36(x2,y2,0.)
+			try:
+				e, n, h = OSTN02.ETRS89_to_OSGB36(x2,y2,0.)
+			except:
+				print "Error: OSTN02 not defined here, using approximation"
+				e, n, h = x2, y2, 0.
 	
 			print e, n, OSGB.grid_to_os_streetview_tile((e, n))
 			collectEastings.append(e)
@@ -82,7 +87,6 @@ if __name__=="__main__":
 			fina = "out/"+str(tileCode[:2])+"/"+str(tileCode[:4])+"_OST50CONT_20130612.osm.bz2"
 			if not os.path.exists(fina): continue
 			fiList.append(fina)
-	exit(0)
 			
 	nextObjId = {"node": -1, "way": -1, "relation": -1}
 	idMapping = {}
